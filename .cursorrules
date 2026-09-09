@@ -38,4 +38,6 @@ No build, test, or lint scripts.
 - NEVER split into a build pipeline; ship static files only.
 - Preserve classic Tetris rules: 7 pieces, wall kicks via `tryRotate`, scoring `[0,100,300,500,800]*level`, level every 10 lines, ghost piece.
 - Do not break keyboard map: Left/Right move, Up/X rotate, Down soft drop, Space hard drop, P pause.
-- Keep Spanish UI strings in HTML/overlay unless asked to change locale.
+- Keep English UI strings in HTML/overlay unless asked to change locale.
+- Hold: C/Shift; modes: Classic, Challenge (40 lines / 2 min), Arcade (power-ups + special pieces).
+- Power-ups and non-standard pieces only in Arcade mode.

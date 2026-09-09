@@ -212,7 +212,7 @@ body {
   box-shadow: 0 0 40px var(--board-shadow);
 }
 
-/* ---- Panel lateral ---- */
+/* ---- Side panel ---- */
 .panel {
   width: 160px;
   display: flex;
@@ -242,14 +242,72 @@ body {
   letter-spacing: 1px;
 }
 
-#next-canvas {
+.board-wrap {
+  position: relative;
+}
+
+#next-canvas,
+#hold-canvas {
   display: block;
   border: 1px solid var(--board-border);
   background: var(--board-bg);
   border-radius: 4px;
+  transition: opacity 0.15s ease;
 }
 
-/* ---- Controles ---- */
+#hold-section.hold-locked #hold-canvas {
+  opacity: 0.35;
+}
+
+.challenge-only.hidden {
+  display: none;
+}
+
+.challenge-goal-label {
+  margin-top: 8px;
+}
+
+.challenge-goal {
+  font-size: 18px;
+}
+
+.fx-banner {
+  position: absolute;
+  left: 50%;
+  top: 28%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 2;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: var(--value);
+  text-shadow: 0 2px 12px var(--board-shadow);
+  animation: fx-pop 0.7s ease-out forwards;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.fx-banner.hidden {
+  display: none;
+}
+
+@keyframes fx-pop {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px) scale(0.9);
+  }
+  20% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-18px) scale(1);
+  }
+}
+
+/* ---- Controls ---- */
 .controls ul {
   list-style: none;
   display: flex;
@@ -312,8 +370,23 @@ kbd {
   color: var(--overlay-score);
 }
 
-#restart-btn {
+.overlay-actions {
   margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.overlay-actions.hidden {
+  display: none;
+}
+
+.overlay-actions button,
+#restart-btn,
+#menu-btn,
+#mode-classic-btn,
+#mode-challenge-btn {
   background: var(--btn-bg);
   color: var(--btn-text);
   border: none;
@@ -324,8 +397,22 @@ kbd {
   cursor: pointer;
   letter-spacing: 1px;
   transition: background 0.15s;
+  min-width: 160px;
 }
 
-#restart-btn:hover {
+.overlay-actions button:hover,
+#restart-btn:hover,
+#mode-classic-btn:hover,
+#mode-challenge-btn:hover {
   background: var(--btn-hover);
+}
+
+.btn-secondary {
+  background: transparent !important;
+  color: var(--value) !important;
+  border: 1px solid var(--board-border) !important;
+}
+
+.btn-secondary:hover {
+  background: var(--toggle-hover) !important;
 }

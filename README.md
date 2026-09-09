@@ -1,6 +1,6 @@
 # Tetris
 
-Implementación del clásico **Tetris** en JavaScript vanilla, usando HTML5 Canvas y CSS. Sin dependencias externas, sin frameworks, sin proceso de build: solo abrir y jugar.
+A classic **Tetris** implementation in vanilla JavaScript with HTML5 Canvas and CSS. No external dependencies, no frameworks, no build step: open and play.
 
 ![Tech](https://img.shields.io/badge/HTML5-Canvas-orange)
 ![Tech](https://img.shields.io/badge/CSS3-blueviolet)
@@ -8,48 +8,50 @@ Implementación del clásico **Tetris** en JavaScript vanilla, usando HTML5 Canv
 
 ---
 
-## Tabla de contenidos
+## Table of contents
 
 - [Tetris](#tetris)
-  - [Tabla de contenidos](#tabla-de-contenidos)
-  - [Qué hace el proyecto](#qué-hace-el-proyecto)
-  - [Cómo ejecutar el juego](#cómo-ejecutar-el-juego)
-    - [Opción 1: abrir el archivo directamente](#opción-1-abrir-el-archivo-directamente)
-    - [Opción 2: servidor local (recomendado)](#opción-2-servidor-local-recomendado)
-  - [Controles](#controles)
-  - [Cómo funciona](#cómo-funciona)
+  - [Table of contents](#table-of-contents)
+  - [What this project does](#what-this-project-does)
+  - [How to run](#how-to-run)
+    - [Option 1: open the file directly](#option-1-open-the-file-directly)
+    - [Option 2: local server (recommended)](#option-2-local-server-recommended)
+  - [Game modes](#game-modes)
+  - [Controls](#controls)
+  - [How it works](#how-it-works)
     - [1. `index.html`](#1-indexhtml)
     - [2. `style.css`](#2-stylecss)
     - [3. `game.js`](#3-gamejs)
-    - [Flujo del juego](#flujo-del-juego)
-  - [Tecnologías](#tecnologías)
-  - [Estructura del proyecto](#estructura-del-proyecto)
-  - [Personalización](#personalización)
-  - [Licencia](#licencia)
+    - [Game flow](#game-flow)
+  - [Tech](#tech)
+  - [Project layout](#project-layout)
+  - [Customization](#customization)
+  - [License](#license)
 
 ---
 
-## Qué hace el proyecto
+## What this project does
 
-Es una versión jugable del Tetris clásico con todas las mecánicas que esperarías:
+A playable classic Tetris with a few modern extras:
 
-- Tablero de **10 × 20** celdas.
-- Las **7 piezas estándar** (I, O, T, S, Z, J, L) con colores diferenciados.
-- **Rotación** con _wall kicks_ básicos (pequeños desplazamientos para que la pieza pueda rotar pegada a la pared).
-- **Soft drop** (bajada acelerada) y **hard drop** (caída instantánea).
-- **Pieza fantasma** (_ghost piece_): muestra dónde aterrizará la pieza actual.
-- **Vista previa** de la siguiente pieza.
-- **Sistema de puntuación** clásico de Tetris (100 / 300 / 500 / 800 multiplicado por nivel).
-- **Niveles** que aumentan cada 10 líneas y aceleran la caída.
-- **Pausa** y **Game Over** con opción de reinicio.
+- Board size **10 x 20**.
+- The **7 standard pieces** (I, O, T, S, Z, J, L) with distinct colors.
+- **Rotation** with basic wall kicks.
+- **Soft drop** and **hard drop**.
+- **Ghost piece** showing where the current piece will land.
+- **Next** preview and **Hold** slot.
+- Classic **scoring** (100 / 300 / 500 / 800 x level) plus **combo**, **T-spin**, **B2B Tetris**, and **Perfect Clear**.
+- **Levels** every 10 lines that speed up gravity.
+- **Classic** (endless standard), **Challenge** (40 lines in 2 minutes), and **Arcade** (power-ups + special pieces).
+- **Pause**, **Game Over**, Challenge victory, and return to menu.
 
 ---
 
-## Cómo ejecutar el juego
+## How to run
 
-No hay nada que instalar ni compilar. Tienes dos opciones:
+Nothing to install or compile. Two options:
 
-### Opción 1: abrir el archivo directamente
+### Option 1: open the file directly
 
 ```bash
 open index.html        # macOS
@@ -57,130 +59,167 @@ xdg-open index.html    # Linux
 start index.html       # Windows
 ```
 
-### Opción 2: servidor local (recomendado)
+### Option 2: local server (recommended)
 
-Cualquier servidor estático funciona. Algunos ejemplos:
+Any static server works. Examples:
 
 ```bash
-# Con Python 3
+# Python 3
 python3 -m http.server 8000
 
-# Con Node.js (npx)
+# Node.js (npx)
 npx serve .
 
-# Con PHP
+# PHP
 php -S localhost:8000
 ```
 
-Después abre `http://localhost:8000` en el navegador.
+Then open `http://localhost:8000` in the browser.
 
 ---
 
-## Controles
+## Game modes
 
-| Tecla     | Acción                            |
-| --------- | --------------------------------- |
-| `←` / `→` | Mover la pieza horizontalmente    |
-| `↑` o `X` | Rotar la pieza en sentido horario |
-| `↓`       | Soft drop (bajar más rápido)      |
-| `Espacio` | Hard drop (caída instantánea)     |
-| `P`       | Pausar / reanudar                 |
+On start, a menu asks you to pick a mode:
+
+| Mode | Goal |
+| ---- | ---- |
+| **Classic** | Endless with the 7 standard pieces |
+| **Challenge** | Clear **40 lines** within **2 minutes** |
+| **Arcade** | Endless with power-ups and special pieces |
+
+In Challenge, the panel shows remaining time and goal progress. Pause freezes the timer.
+
+### Arcade extras
+
+**Power-ups** (queued about every 8 lines cleared; activate on lock):
+
+| Power-up | Effect |
+| -------- | ------ |
+| Bomb | Clears a 3x3 area |
+| Lightning | Clears the full row and column |
+| Tint | Turns all blocks of one color into wildcards |
+| Gravity | Compacts holes downward per column |
+| Freeze | Stops gravity for 5 seconds (soft/hard drop still work) |
+
+**Special pieces** (occasional):
+
+- Pentominoes: `+`, `U`, `Y`
+- Hollow `3x3` (rare challenge piece)
+- `1x1` single after a Tetris (4-line clear)
+
+Classic and Challenge never spawn these.
 
 ---
 
-## Cómo funciona
+## Controls
 
-El juego se compone de tres archivos que cooperan:
+| Key | Action |
+| --- | ------ |
+| `<-` / `->` | Move piece horizontally |
+| `Up` or `X` | Rotate clockwise |
+| `Down` | Soft drop |
+| `Space` | Hard drop |
+| `C` or `Shift` | Hold: store / swap piece (once per piece) |
+| `P` | Pause / resume |
+
+---
+
+## How it works
+
+Three cooperating files:
 
 ### 1. `index.html`
 
-Define la estructura visual:
-
-- Un `<canvas id="board">` de **300 × 600** píxeles donde se renderiza el tablero.
-- Un panel lateral con `SCORE`, `LINES`, `LEVEL`, vista de la siguiente pieza y la lista de controles.
-- Un overlay para los estados **PAUSA** y **GAME OVER**.
+- `<canvas id="board">` at **300 x 600** for the playfield.
+- Side panel: `SCORE`, `LINES`, `LEVEL`, `HOLD`, `NEXT`, Challenge HUD, controls.
+- Overlay for mode menu, **PAUSED**, **GAME OVER**, and **VICTORY**.
 
 ### 2. `style.css`
 
-Aporta el aspecto visual con estética _dark / retro arcade_: fondo oscuro, tipografía monoespaciada para los marcadores y _backdrop blur_ en los overlays.
+Dark / retro arcade look, monospace HUD, dimmed hold when locked, combo banner, overlay blur, light/dark theme.
 
 ### 3. `game.js`
 
-Contiene toda la lógica del juego. A grandes rasgos:
+All game logic:
 
-- **Modelo del tablero**: una matriz `ROWS × COLS` donde cada celda guarda `0` (vacía) o un índice de color (1–7) que identifica la pieza.
-- **Piezas**: definidas como matrices cuadradas. Para rotar se calcula la transposición + reverso de filas (`rotateCW`).
-- **Detección de colisiones** (`collide`): comprueba que ninguna celda de la pieza salga del tablero ni se solape con bloques ya fijados.
-- **Wall kicks** (`tryRotate`): si la rotación choca, intenta desplazar la pieza ±1 y ±2 columnas antes de descartar el giro.
-- **Game loop** (`loop`): basado en `requestAnimationFrame`, acumula el tiempo transcurrido y baja la pieza una fila cuando se supera `dropInterval`.
-- **Limpieza de líneas** (`clearLines`): recorre el tablero de abajo hacia arriba; cada fila completa se elimina y se inserta una vacía en la cima.
-- **Puntuación**: usa la tabla clásica `[0, 100, 300, 500, 800]` multiplicada por el nivel actual; el hard drop suma 2 puntos por celda recorrida y el soft drop 1 punto por fila.
-- **Nivel y velocidad**: el nivel sube cada 10 líneas; la velocidad de caída se calcula como `max(100, 1000 − (level − 1) × 90)` milisegundos.
-- **Ghost piece** (`ghostY`): proyecta la posición final de la pieza actual hacia abajo y la dibuja con `globalAlpha = 0.2`.
+- Board model: `ROWS x COLS` matrix; `0` empty or color index `1-7`.
+- Pieces as matrices; rotation via transpose + reverse (`rotateCW`).
+- Collision (`collide`) and wall kicks (`tryRotate`).
+- Hold (`holdPiece`): store or swap; locked until the piece settles.
+- Game loop (`loop`): `requestAnimationFrame`; Challenge also accumulates time.
+- Line clears (`clearLines`): combo / T-spin / B2B / Perfect Clear.
+- Level and speed: level every 10 lines; `max(100, 1000 - (level - 1) * 90)` ms.
+- Ghost piece (`ghostY`) drawn at `globalAlpha = 0.2`.
 
-### Flujo del juego
+### Game flow
 
 ```
-init()
-  ├─ createBoard()                  → matriz vacía
-  ├─ next = randomPiece()
-  ├─ spawn()                        → mueve next a current y genera nueva next
-  └─ requestAnimationFrame(loop)
-        ↓
-   loop(timestamp)
-     ├─ acumula dt
-     ├─ si dt ≥ dropInterval → baja la pieza o llama a lockPiece()
-     ├─ draw()  (grid + tablero + ghost + pieza actual)
-     └─ requestAnimationFrame(loop)
+showMenu()
+  - Classic / Challenge / Arcade -> init(mode)
+        - createBoard()
+        - next = randomPiece()
+        - spawn()
+        - requestAnimationFrame(loop)
 
-   keydown → mover / rotar / soft-drop / hard-drop / pausa
+loop(timestamp)
+  - accumulate dt (and Challenge timer if needed)
+  - if dt >= dropInterval -> drop or lockPiece()
+  - draw()
+  - requestAnimationFrame(loop)
+
+keydown -> move / rotate / soft-drop / hard-drop / hold / pause
 ```
 
-Cuando una pieza recién generada ya colisiona al aparecer (`spawn`), se dispara `endGame()` y se muestra el overlay de **Game Over**.
+If a spawned piece already collides, `endGame()` runs. In Challenge, 40 lines wins (`VICTORY`); running out of time shows `TIME'S UP`.
 
 ---
 
-## Tecnologías
+## Tech
 
-- **HTML5** — marcado y dos elementos `<canvas>` (tablero y vista previa).
-- **CSS3** — _flexbox_, variables de color, `backdrop-filter` y `box-shadow`.
-- **JavaScript (ES6+) vanilla** — `const`/`let`, _arrow functions_, _spread operator_, `Array.from`, _template literals_…
-- **Canvas 2D API** — para todo el renderizado del juego.
-- **`requestAnimationFrame`** — para el bucle de juego sincronizado con el navegador.
+- **HTML5** - markup and canvases (board, next, hold).
+- **CSS3** - flexbox, color variables, `backdrop-filter`, `box-shadow`.
+- **JavaScript (ES6+) vanilla** - no modules or bundler.
+- **Canvas 2D API** - rendering.
+- **`requestAnimationFrame`** - browser-synced loop.
 
-**Sin dependencias.** No hay `package.json`, ni bundler, ni transpilador.
+**No dependencies.** No `package.json`, bundler, or transpiler.
 
 ---
 
-## Estructura del proyecto
+## Project layout
 
 ```
-03-tetris/
-├── index.html      # Estructura del DOM y canvas
-├── style.css       # Estilos del juego (dark theme)
-├── game.js         # Toda la lógica del Tetris (~300 líneas)
-└── README.md
+claude-tetris/
+  index.html      # DOM structure and canvases
+  style.css       # Styles (dark/light themes)
+  game.js         # Full Tetris logic
+  README.md
 ```
 
 ---
 
-## Personalización
+## Customization
 
-Algunos parámetros fáciles de tunear en `game.js`:
+Easy knobs in `game.js`:
 
-| Constante      | Significado                              | Por defecto           |
-| -------------- | ---------------------------------------- | --------------------- |
-| `COLS`         | Columnas del tablero                     | `10`                  |
-| `ROWS`         | Filas del tablero                        | `20`                  |
-| `BLOCK`        | Tamaño en píxeles de cada celda          | `30`                  |
-| `COLORS`       | Paleta de colores por tipo de pieza      | 7 colores             |
-| `LINE_SCORES`  | Puntos por 1, 2, 3 o 4 líneas eliminadas | `[0,100,300,500,800]` |
-| `dropInterval` | Velocidad inicial de caída en ms         | `1000`                |
+| Constant | Meaning | Default |
+| -------- | ------- | ------- |
+| `COLS` | Board columns | `10` |
+| `ROWS` | Board rows | `20` |
+| `BLOCK` | Cell size in pixels | `30` |
+| `COLORS` | Palette per piece type | 7 colors |
+| `LINE_SCORES` | Points for 1-4 lines | `[0,100,300,500,800]` |
+| `CHALLENGE_LINES` | Challenge line goal | `40` |
+| `CHALLENGE_MS` | Challenge time limit (ms) | `120000` |
+| `POWERUP_EVERY_LINES` | Arcade lines between power-ups | `8` |
+| `FREEZE_MS` | Arcade freeze duration (ms) | `5000` |
+| `dropInterval` | Initial drop speed (ms) | `1000` |
 
-> Si cambias `COLS`, `ROWS` o `BLOCK`, recuerda ajustar también `width` y `height` del `<canvas id="board">` en `index.html` para que coincida (`COLS × BLOCK` × `ROWS × BLOCK`).
+> If you change `COLS`, `ROWS`, or `BLOCK`, also update `width` and `height` on `<canvas id="board">` in `index.html` (`COLS * BLOCK` x `ROWS * BLOCK`).
 
 ---
 
-## Licencia
+## License
 
-Proyecto de uso libre con fines educativos y de práctica.
+Free for educational and practice use.

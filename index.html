@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -14,9 +14,9 @@
         type="button"
         id="theme-toggle"
         class="theme-toggle"
-        aria-label="Cambiar a modo claro"
+        aria-label="Switch to light mode"
         aria-pressed="false"
-        title="Cambiar tema"
+        title="Toggle theme"
       >
         <span class="theme-toggle-track" aria-hidden="true">
           <span class="theme-toggle-thumb">
@@ -42,7 +42,10 @@
     </header>
     <div class="wrapper">
       <div class="game-container">
-        <canvas id="board" width="300" height="600"></canvas>
+        <div class="board-wrap">
+          <canvas id="board" width="300" height="600"></canvas>
+          <div id="fx-banner" class="fx-banner hidden" aria-live="polite"></div>
+        </div>
 
         <aside class="panel">
           <div class="panel-section">
@@ -57,6 +60,17 @@
             <span class="label">LEVEL</span>
             <span class="value" id="level">1</span>
           </div>
+          <div class="panel-section challenge-only hidden" id="challenge-hud">
+            <span class="label">TIME</span>
+            <span class="value" id="time-left">2:00</span>
+            <span class="label challenge-goal-label">GOAL</span>
+            <span class="value challenge-goal" id="challenge-progress">0 / 40</span>
+          </div>
+
+          <div class="panel-section" id="hold-section">
+            <span class="label">HOLD</span>
+            <canvas id="hold-canvas" width="120" height="120"></canvas>
+          </div>
 
           <div class="panel-section">
             <span class="label">NEXT</span>
@@ -66,27 +80,36 @@
           <div class="panel-section controls">
             <span class="label">CONTROLS</span>
             <ul>
-              <li><kbd>←</kbd><kbd>→</kbd> mover</li>
-              <li><kbd>↑</kbd> rotar</li>
-              <li><kbd>↓</kbd> bajar</li>
-              <li><kbd>Space</kbd> caída</li>
-              <li><kbd>P</kbd> pausa</li>
+              <li><kbd>&lt;-</kbd><kbd>-&gt;</kbd> move</li>
+              <li><kbd>Up</kbd> rotate</li>
+              <li><kbd>Down</kbd> soft drop</li>
+              <li><kbd>Space</kbd> hard drop</li>
+              <li><kbd>C</kbd><kbd>Shift</kbd> hold</li>
+              <li><kbd>P</kbd> pause</li>
             </ul>
           </div>
         </aside>
       </div>
 
-      <div id="overlay" class="overlay hidden">
+      <div id="overlay" class="overlay">
         <div class="overlay-box">
-          <p id="overlay-title">GAME OVER</p>
-          <p id="overlay-score"></p>
-          <button id="restart-btn">Reiniciar</button>
+          <p id="overlay-title">TETRIS</p>
+          <p id="overlay-score">Choose a mode</p>
+          <div id="overlay-actions" class="overlay-actions">
+            <button type="button" id="mode-classic-btn">Classic</button>
+            <button type="button" id="mode-challenge-btn">Challenge</button>
+            <button type="button" id="mode-arcade-btn">Arcade</button>
+          </div>
+          <div id="overlay-end-actions" class="overlay-actions hidden">
+            <button type="button" id="restart-btn">Restart</button>
+            <button type="button" id="menu-btn" class="btn-secondary">Back to menu</button>
+          </div>
         </div>
       </div>
     </div>
 
     <footer class="site-footer">
-      Desarrollado por
+      Built by
       <a href="https://github.com/JuanMaVelezPa" target="_blank" rel="noopener noreferrer">JuanMaVelezPa</a>
     </footer>
   </div>
