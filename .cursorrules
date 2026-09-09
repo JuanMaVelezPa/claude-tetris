@@ -1,0 +1,41 @@
+# Claude Tetris
+
+Vanilla browser Tetris. No package.json, bundler, framework, or tests.
+
+## Tech Stack
+- HTML5 + CSS3 + JavaScript ES6+ (`'use strict'`)
+- Canvas 2D API (`#board`, `#next-canvas`)
+- `requestAnimationFrame` game loop
+- Zero npm/runtime deps
+
+## Commands
+```bash
+# Dev (recommended)
+python3 -m http.server 8000
+# or: npx serve .
+# or: open index.html / xdg-open index.html
+```
+No build, test, or lint scripts.
+
+## Project Layout
+```
+/
+  index.html   # DOM: board canvas 300x600, HUD, overlay, loads game.js
+  style.css    # Dark arcade UI; flex layout; overlay blur
+  game.js      # All game logic (~300 lines, single file)
+  README.md
+```
+
+## Code Standards
+- Keep logic in `game.js`; markup IDs must stay in sync with `getElementById` usage.
+- Board model: `ROWS x COLS` matrix; cell `0` empty, `1-7` piece color index (`COLORS`/`PIECES`).
+- Tunables at top of `game.js`: `COLS`, `ROWS`, `BLOCK`, `COLORS`, `PIECES`, `LINE_SCORES`, `dropInterval`.
+- If changing `COLS`/`ROWS`/`BLOCK`, update `#board` canvas `width`/`height` (`COLS*BLOCK` x `ROWS*BLOCK`).
+- Prefer plain functions; no modules/imports; browser globals OK for this size.
+
+## Constraints
+- NEVER add frameworks, bundlers, TypeScript, or npm deps unless explicitly requested.
+- NEVER split into a build pipeline; ship static files only.
+- Preserve classic Tetris rules: 7 pieces, wall kicks via `tryRotate`, scoring `[0,100,300,500,800]*level`, level every 10 lines, ghost piece.
+- Do not break keyboard map: Left/Right move, Up/X rotate, Down soft drop, Space hard drop, P pause.
+- Keep Spanish UI strings in HTML/overlay unless asked to change locale.
