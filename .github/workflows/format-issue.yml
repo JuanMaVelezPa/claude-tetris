@@ -21,7 +21,7 @@ jobs:
           api-key: ${{ secrets.CURSOR_API_KEY }}
           prompt: |
             You are a project management assistant.
-            The issue below is written in Spanish. Translate it to English and rewrite it in a professional format.
+            The issue below is written in Spanish. Translate it to English and rewrite it as clear Markdown so both humans and AI coding agents can understand the request without ambiguity.
 
             Current title: ${{ github.event.issue.title }}
             Current body:
@@ -30,8 +30,14 @@ jobs:
             Instructions:
             1. Translate all content from Spanish to English.
             2. Fix spelling and wording in the English result.
-            3. Add Markdown sections: **Description**, **Steps to Reproduce** (if applicable), and **Expected Behavior**.
-            4. Return ONLY the final formatted English text.
+            3. Write the entire description in GitHub-flavored Markdown (headings, lists, code fences when useful).
+            4. Use these Markdown sections when they apply:
+               - ## Description
+               - ## Steps to Reproduce
+               - ## Expected Behavior
+               - ## Additional Context (optional)
+            5. Prefer concrete, actionable wording (what to change, where, and acceptance criteria) so an AI can implement or triage the issue.
+            6. Return ONLY the final formatted English Markdown body. Do not wrap it in a code fence or add commentary.
 
       - name: Update Issue on GitHub
         if: ${{ steps.cursor.outputs.summary != '' }}
