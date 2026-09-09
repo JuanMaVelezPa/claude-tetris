@@ -1,0 +1,52 @@
+name: Formatear Issue con Cursor
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  format-issue:
+    # Evita bucles: al editar el body el autor no cambia; filtrar por quien dispara el evento
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ejecutar Cursor Agent
+        uses: PunGrumpy/cursor-action@v1
+        id: cursor
+        with:
+          api-key: ${{ secrets.CURSOR_API_KEY }}
+          prompt: |
+            Eres un asistente de gestión de proyectos.
+            Analiza el siguiente Issue de GitHub y reescríbelo formateado profesionalmente.
+
+            Título actual: ${{ github.event.issue.title }}
+            Contenido actual:
+            ${{ github.event.issue.body }}
+
+            Instrucciones:
+            1. Corrige la ortografía y redacción.
+            2. Agrega secciones en Markdown: **Descripción**, **Pasos para reproducir** (si aplica) y **Comportamiento esperado**.
+            3. Devuelve ÚNICAMENTE el texto formateado final.
+
+      - name: Actualizar el Issue en GitHub
+        if: ${{ steps.cursor.outputs.summary != '' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const formattedBody = process.env.CURSOR_OUTPUT;
+            if (!formattedBody || !formattedBody.trim()) {
+              core.info('Empty Cursor output; skipping update');
+              return;
+            }
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: formattedBody
+            });
+        env:
+          CURSOR_OUTPUT: ${{ steps.cursor.outputs.summary }}
