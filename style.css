@@ -34,6 +34,23 @@ body {
   color: #7aa2f7;
 }
 
+.site-footer {
+  margin-top: 20px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #555570;
+  text-align: center;
+}
+
+.site-footer a {
+  color: #7aa2f7;
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  text-decoration: underline;
+}
+
 .game-container {
   display: flex;
   gap: 20px;
