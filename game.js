@@ -40,7 +40,6 @@ const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 const themeToggle = document.getElementById('theme-toggle');
-const themeToggleText = themeToggle.querySelector('.theme-toggle-text');
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 
@@ -49,7 +48,10 @@ function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', nextTheme);
   const isLight = nextTheme === 'light';
   themeToggle.setAttribute('aria-pressed', String(isLight));
-  themeToggleText.textContent = isLight ? 'Oscuro' : 'Claro';
+  themeToggle.setAttribute(
+    'aria-label',
+    isLight ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'
+  );
 }
 
 themeToggle.addEventListener('click', () => {
