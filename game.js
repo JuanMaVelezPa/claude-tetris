@@ -122,6 +122,7 @@ function hardDrop() {
   const gy = ghostY();
   score += (gy - current.y) * 2;
   current.y = gy;
+  updateHUD();
   lockPiece();
 }
 
@@ -230,6 +231,7 @@ function togglePause() {
   if (gameOver) return;
   paused = !paused;
   if (!paused) {
+    overlay.classList.add('hidden');
     lastTime = performance.now();
     loop(lastTime);
   } else {
