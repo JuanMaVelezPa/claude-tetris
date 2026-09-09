@@ -1,4 +1,4 @@
-name: Formatear Issue con Cursor
+name: Format Issue with Cursor
 
 on:
   issues:
@@ -10,29 +10,30 @@ permissions:
 
 jobs:
   format-issue:
-    # Evita bucles: al editar el body el autor no cambia; filtrar por quien dispara el evento
+    # Avoid loops: editing the body does not change the author; filter by who triggered the event
     if: ${{ github.actor != 'github-actions[bot]' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Ejecutar Cursor Agent
+      - name: Run Cursor Agent
         uses: PunGrumpy/cursor-action@v1
         id: cursor
         with:
           api-key: ${{ secrets.CURSOR_API_KEY }}
           prompt: |
-            Eres un asistente de gestión de proyectos.
-            Analiza el siguiente Issue de GitHub y reescríbelo formateado profesionalmente.
+            You are a project management assistant.
+            The issue below is written in Spanish. Translate it to English and rewrite it in a professional format.
 
-            Título actual: ${{ github.event.issue.title }}
-            Contenido actual:
+            Current title: ${{ github.event.issue.title }}
+            Current body:
             ${{ github.event.issue.body }}
 
-            Instrucciones:
-            1. Corrige la ortografía y redacción.
-            2. Agrega secciones en Markdown: **Descripción**, **Pasos para reproducir** (si aplica) y **Comportamiento esperado**.
-            3. Devuelve ÚNICAMENTE el texto formateado final.
+            Instructions:
+            1. Translate all content from Spanish to English.
+            2. Fix spelling and wording in the English result.
+            3. Add Markdown sections: **Description**, **Steps to Reproduce** (if applicable), and **Expected Behavior**.
+            4. Return ONLY the final formatted English text.
 
-      - name: Actualizar el Issue en GitHub
+      - name: Update Issue on GitHub
         if: ${{ steps.cursor.outputs.summary != '' }}
         uses: actions/github-script@v7
         with:
