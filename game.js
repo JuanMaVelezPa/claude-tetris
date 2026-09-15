@@ -70,6 +70,8 @@ const PIECES = [
 const POWER_TYPES = [TYPE_BOMB, TYPE_LIGHTNING, TYPE_TINT, TYPE_GRAVITY, TYPE_FREEZE];
 const PENTOMINO_TYPES = [TYPE_PLUS, TYPE_U, TYPE_Y];
 const LINE_SCORES = [0, 100, 300, 500, 800];
+const MIN_START_LEVEL = 1;
+const MAX_START_LEVEL = 15;
 
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
@@ -90,8 +92,17 @@ const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const overlayActions = document.getElementById('overlay-actions');
 const overlayEndActions = document.getElementById('overlay-end-actions');
+const overlayPauseActions = document.getElementById('overlay-pause-actions');
+const overlayPauseControls = document.getElementById('overlay-pause-controls');
 const restartBtn = document.getElementById('restart-btn');
 const menuBtn = document.getElementById('menu-btn');
+const resumeBtn = document.getElementById('resume-btn');
+const pauseRestartBtn = document.getElementById('pause-restart-btn');
+const pauseControlsBtn = document.getElementById('pause-controls-btn');
+const pauseControlsBackBtn = document.getElementById('pause-controls-back-btn');
+const levelDownBtn = document.getElementById('level-down-btn');
+const levelUpBtn = document.getElementById('level-up-btn');
+const startLevelValueEl = document.getElementById('start-level-value');
 const modeClassicBtn = document.getElementById('mode-classic-btn');
 const modeChallengeBtn = document.getElementById('mode-challenge-btn');
 const modeArcadeBtn = document.getElementById('mode-arcade-btn');
@@ -104,6 +115,8 @@ let mode, combo, lastAction, lastWasTetris, challengeElapsed;
 let linesTowardPower, pendingPower, pendingSingle, freezeUntil;
 let fxTimer = null;
 let inMenu = true;
+let startLevel = MIN_START_LEVEL;
+let pauseView = 'main';
 
 function isArcade() {
   return mode === 'arcade';
@@ -372,8 +385,8 @@ function clearLines(wasTSpin) {
 
   lines += cleared;
   score += lineScore;
-  level = Math.floor(lines / 10) + 1;
-  dropInterval = Math.max(100, 1000 - (level - 1) * 90);
+  level = startLevel + Math.floor(lines / 10);
+  dropInterval = dropSpeedForLevel(level);
   maybeQueueArcadeRewards(cleared, isTetris);
   updateHUD();
   if (labels.length) showFx(labels.join(' / '));
@@ -561,16 +574,45 @@ function drawHold() {
   drawPreview(holdCtx, hold, holdCanvas);
 }
 
+function dropSpeedForLevel(lv) {
+  return Math.max(100, 1000 - (lv - 1) * 90);
+}
+
+function syncStartLevelUI() {
+  startLevelValueEl.textContent = String(startLevel);
+  levelDownBtn.disabled = startLevel <= MIN_START_LEVEL;
+  levelUpBtn.disabled = startLevel >= MAX_START_LEVEL;
+}
+
+function hideAllOverlayPanels() {
+  overlayActions.classList.add('hidden');
+  overlayEndActions.classList.add('hidden');
+  overlayPauseActions.classList.add('hidden');
+  overlayPauseControls.classList.add('hidden');
+}
+
 function showOverlayView(kind) {
   overlay.classList.remove('hidden');
+  hideAllOverlayPanels();
   if (kind === 'menu') {
     inMenu = true;
+    pauseView = 'main';
     overlayTitle.textContent = 'TETRIS';
     overlayScore.textContent = 'Choose a mode';
     overlayActions.classList.remove('hidden');
-    overlayEndActions.classList.add('hidden');
+  } else if (kind === 'pause') {
+    pauseView = 'main';
+    overlayTitle.textContent = 'PAUSED';
+    overlayScore.textContent = '';
+    overlayPauseActions.classList.remove('hidden');
+    syncStartLevelUI();
+  } else if (kind === 'pause-controls') {
+    pauseView = 'controls';
+    overlayTitle.textContent = 'CONTROLS';
+    overlayScore.textContent = '';
+    overlayPauseControls.classList.remove('hidden');
   } else {
-    overlayActions.classList.add('hidden');
+    pauseView = 'main';
     overlayEndActions.classList.remove('hidden');
   }
 }
@@ -578,6 +620,13 @@ function showOverlayView(kind) {
 function hideOverlay() {
   overlay.classList.add('hidden');
   inMenu = false;
+  pauseView = 'main';
+}
+
+function adjustStartLevel(delta) {
+  if (!paused || pauseView !== 'main') return;
+  startLevel = Math.min(MAX_START_LEVEL, Math.max(MIN_START_LEVEL, startLevel + delta));
+  syncStartLevelUI();
 }
 
 function endGame(reason) {
@@ -602,18 +651,31 @@ function winGame() {
   showOverlayView('end');
 }
 
+function resumeGame() {
+  if (!paused || gameOver || inMenu || won) return;
+  paused = false;
+  hideOverlay();
+  lastTime = performance.now();
+  animId = requestAnimationFrame(loop);
+}
+
+function pauseGame() {
+  if (paused || gameOver || inMenu || won) return;
+  paused = true;
+  cancelAnimationFrame(animId);
+  showOverlayView('pause');
+}
+
 function togglePause() {
   if (gameOver || inMenu || won) return;
-  paused = !paused;
-  if (!paused) {
-    hideOverlay();
-    lastTime = performance.now();
-    animId = requestAnimationFrame(loop);
+  if (paused) {
+    if (pauseView === 'controls') {
+      showOverlayView('pause');
+      return;
+    }
+    resumeGame();
   } else {
-    cancelAnimationFrame(animId);
-    overlayTitle.textContent = 'PAUSED';
-    overlayScore.textContent = '';
-    showOverlayView('end');
+    pauseGame();
   }
 }
 
@@ -657,11 +719,11 @@ function init(selectedMode) {
   board = createBoard();
   score = 0;
   lines = 0;
-  level = 1;
+  level = startLevel;
   paused = false;
   gameOver = false;
   won = false;
-  dropInterval = 1000;
+  dropInterval = dropSpeedForLevel(level);
   dropAccum = 0;
   lastTime = performance.now();
   hold = null;
@@ -704,8 +766,11 @@ function showMenu() {
 }
 
 document.addEventListener('keydown', e => {
-  if (e.code === 'KeyP') {
-    if (!inMenu) togglePause();
+  if (e.code === 'KeyP' || e.code === 'Escape') {
+    if (!inMenu && !gameOver && !won) {
+      e.preventDefault();
+      togglePause();
+    }
     return;
   }
   if (paused || gameOver || inMenu || won) return;
@@ -749,5 +814,12 @@ modeChallengeBtn.addEventListener('click', () => init('challenge'));
 modeArcadeBtn.addEventListener('click', () => init('arcade'));
 restartBtn.addEventListener('click', () => init(mode || 'classic'));
 menuBtn.addEventListener('click', showMenu);
+resumeBtn.addEventListener('click', resumeGame);
+pauseRestartBtn.addEventListener('click', () => init(mode || 'classic'));
+pauseControlsBtn.addEventListener('click', () => showOverlayView('pause-controls'));
+pauseControlsBackBtn.addEventListener('click', () => showOverlayView('pause'));
+levelDownBtn.addEventListener('click', () => adjustStartLevel(-1));
+levelUpBtn.addEventListener('click', () => adjustStartLevel(1));
 
+syncStartLevelUI();
 showMenu();

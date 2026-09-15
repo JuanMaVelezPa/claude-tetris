@@ -386,7 +386,8 @@ kbd {
 #restart-btn,
 #menu-btn,
 #mode-classic-btn,
-#mode-challenge-btn {
+#mode-challenge-btn,
+#mode-arcade-btn {
   background: var(--btn-bg);
   color: var(--btn-text);
   border: none;
@@ -403,7 +404,8 @@ kbd {
 .overlay-actions button:hover,
 #restart-btn:hover,
 #mode-classic-btn:hover,
-#mode-challenge-btn:hover {
+#mode-challenge-btn:hover,
+#mode-arcade-btn:hover {
   background: var(--btn-hover);
 }
 
@@ -415,4 +417,77 @@ kbd {
 
 .btn-secondary:hover {
   background: var(--toggle-hover) !important;
+}
+
+.pause-level-row {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 160px;
+}
+
+.pause-level-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--label);
+  text-transform: uppercase;
+}
+
+.pause-level-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.level-step-btn {
+  background: var(--kbd-bg) !important;
+  color: var(--value) !important;
+  border: 1px solid var(--board-border) !important;
+  border-radius: 6px !important;
+  min-width: 40px !important;
+  padding: 8px 12px !important;
+  font-size: 16px !important;
+  line-height: 1;
+}
+
+.level-step-btn:hover {
+  background: var(--toggle-hover) !important;
+}
+
+.start-level-value {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--value);
+  min-width: 2ch;
+  text-align: center;
+}
+
+.pause-level-hint {
+  font-size: 11px;
+  color: var(--controls-text);
+}
+
+.overlay-controls-list {
+  list-style: none;
+  text-align: left;
+  font-size: 13px;
+  color: var(--controls-text);
+  line-height: 2;
+  margin-bottom: 4px;
+}
+
+.overlay-controls-list kbd {
+  display: inline-block;
+  background: var(--kbd-bg);
+  border: 1px solid var(--kbd-border);
+  border-radius: 3px;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-family: inherit;
+  color: var(--kbd-text);
+  margin-right: 2px;
 }

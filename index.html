@@ -85,7 +85,7 @@
               <li><kbd>Down</kbd> soft drop</li>
               <li><kbd>Space</kbd> hard drop</li>
               <li><kbd>C</kbd><kbd>Shift</kbd> hold</li>
-              <li><kbd>P</kbd> pause</li>
+              <li><kbd>P</kbd><kbd>Esc</kbd> pause</li>
             </ul>
           </div>
         </aside>
@@ -103,6 +103,31 @@
           <div id="overlay-end-actions" class="overlay-actions hidden">
             <button type="button" id="restart-btn">Restart</button>
             <button type="button" id="menu-btn" class="btn-secondary">Back to menu</button>
+          </div>
+          <div id="overlay-pause-actions" class="overlay-actions hidden">
+            <button type="button" id="resume-btn">Resume</button>
+            <button type="button" id="pause-restart-btn">Restart</button>
+            <button type="button" id="pause-controls-btn" class="btn-secondary">Controls</button>
+            <div class="pause-level-row" id="pause-level-row">
+              <span class="pause-level-label">Start level</span>
+              <div class="pause-level-controls">
+                <button type="button" id="level-down-btn" class="level-step-btn" aria-label="Decrease start level">-</button>
+                <span id="start-level-value" class="start-level-value" aria-live="polite">1</span>
+                <button type="button" id="level-up-btn" class="level-step-btn" aria-label="Increase start level">+</button>
+              </div>
+              <span class="pause-level-hint">Applies to next game</span>
+            </div>
+          </div>
+          <div id="overlay-pause-controls" class="overlay-actions overlay-controls-panel hidden">
+            <ul class="overlay-controls-list">
+              <li><kbd>&lt;-</kbd><kbd>-&gt;</kbd> move</li>
+              <li><kbd>Up</kbd><kbd>X</kbd> rotate</li>
+              <li><kbd>Down</kbd> soft drop</li>
+              <li><kbd>Space</kbd> hard drop</li>
+              <li><kbd>C</kbd><kbd>Shift</kbd> hold</li>
+              <li><kbd>P</kbd><kbd>Esc</kbd> pause</li>
+            </ul>
+            <button type="button" id="pause-controls-back-btn" class="btn-secondary">Back</button>
           </div>
         </div>
       </div>
