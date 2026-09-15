@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="dark" data-skin="retro">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -85,7 +85,7 @@
               <li><kbd>Down</kbd> soft drop</li>
               <li><kbd>Space</kbd> hard drop</li>
               <li><kbd>C</kbd><kbd>Shift</kbd> hold</li>
-              <li><kbd>P</kbd> pause</li>
+              <li><kbd>P</kbd><kbd>Esc</kbd> pause</li>
             </ul>
           </div>
         </aside>
@@ -95,14 +95,65 @@
         <div class="overlay-box">
           <p id="overlay-title">TETRIS</p>
           <p id="overlay-score">Choose a mode</p>
+          <p id="overlay-highlight" class="overlay-highlight hidden"></p>
+
+          <div id="records-panel" class="records-panel">
+            <span class="label">HIGH SCORES</span>
+            <ol id="records-list" class="records-list"></ol>
+            <div class="records-stats">
+              <span>Best combo: <strong id="best-combo">0</strong></span>
+              <span>Max lines: <strong id="max-lines-stat">0</strong></span>
+            </div>
+            <button type="button" id="reset-records-btn" class="btn-secondary btn-small">Reset records</button>
+          </div>
+
+          <div id="skin-panel" class="skin-panel">
+            <span class="label">SKIN</span>
+            <div class="skin-buttons" id="skin-buttons">
+              <button type="button" data-skin="retro" class="skin-btn active">Retro</button>
+              <button type="button" data-skin="neon" class="skin-btn">Neon</button>
+              <button type="button" data-skin="pastel" class="skin-btn">Pastel</button>
+              <button type="button" data-skin="pixel" class="skin-btn">Pixel</button>
+            </div>
+          </div>
+
+          <div id="start-level-panel" class="start-level-panel">
+            <label for="start-level-select" class="label">START LEVEL</label>
+            <select id="start-level-select" aria-label="Initial level"></select>
+          </div>
+
           <div id="overlay-actions" class="overlay-actions">
             <button type="button" id="mode-classic-btn">Classic</button>
             <button type="button" id="mode-challenge-btn">Challenge</button>
             <button type="button" id="mode-arcade-btn">Arcade</button>
           </div>
+
           <div id="overlay-end-actions" class="overlay-actions hidden">
+            <div id="name-entry" class="name-entry hidden">
+              <label for="player-name" class="label">YOUR NAME</label>
+              <input type="text" id="player-name" maxlength="12" placeholder="AAA" autocomplete="off" />
+              <button type="button" id="save-score-btn">Save score</button>
+            </div>
             <button type="button" id="restart-btn">Restart</button>
             <button type="button" id="menu-btn" class="btn-secondary">Back to menu</button>
+          </div>
+
+          <div id="overlay-pause-actions" class="overlay-actions hidden">
+            <button type="button" id="resume-btn">Resume</button>
+            <button type="button" id="pause-restart-btn">Restart</button>
+            <button type="button" id="pause-controls-btn" class="btn-secondary">Controls</button>
+          </div>
+
+          <div id="overlay-controls-view" class="overlay-controls-view hidden">
+            <ul class="overlay-controls-list">
+              <li><kbd>&lt;-</kbd><kbd>-&gt;</kbd> move</li>
+              <li><kbd>Up</kbd><kbd>X</kbd> rotate</li>
+              <li><kbd>Down</kbd> soft drop</li>
+              <li><kbd>Space</kbd> hard drop</li>
+              <li><kbd>C</kbd><kbd>Shift</kbd> hold</li>
+              <li><kbd>P</kbd><kbd>Esc</kbd> pause / resume</li>
+            </ul>
+            <button type="button" id="controls-back-btn" class="btn-secondary">Back</button>
           </div>
         </div>
       </div>
