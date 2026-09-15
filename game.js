@@ -146,6 +146,8 @@ const PENTOMINO_TYPES = [TYPE_PLUS, TYPE_U, TYPE_Y];
 const LINE_SCORES = [0, 100, 300, 500, 800];
 const MIN_START_LEVEL = 1;
 const MAX_START_LEVEL = 15;
+const RECORDS_KEY = 'tetris-records';
+const RECORDS_MAX = 5;
 
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
@@ -168,6 +170,13 @@ const overlayActions = document.getElementById('overlay-actions');
 const overlayEndActions = document.getElementById('overlay-end-actions');
 const overlayPauseActions = document.getElementById('overlay-pause-actions');
 const overlayPauseControls = document.getElementById('overlay-pause-controls');
+const recordsPanel = document.getElementById('records-panel');
+const recordsList = document.getElementById('records-list');
+const recordsStats = document.getElementById('records-stats');
+const recordsForm = document.getElementById('records-form');
+const recordsName = document.getElementById('records-name');
+const recordsSaveBtn = document.getElementById('records-save-btn');
+const recordsResetBtn = document.getElementById('records-reset-btn');
 const restartBtn = document.getElementById('restart-btn');
 const menuBtn = document.getElementById('menu-btn');
 const resumeBtn = document.getElementById('resume-btn');
@@ -186,12 +195,14 @@ const skinSelect = document.getElementById('skin-select');
 let board, current, next, hold, holdLocked;
 let score, lines, level, paused, gameOver, won;
 let lastTime, dropAccum, dropInterval, animId;
-let mode, combo, lastAction, lastWasTetris, challengeElapsed;
+let mode, combo, maxCombo, lastAction, lastWasTetris, challengeElapsed;
 let linesTowardPower, pendingPower, pendingSingle, freezeUntil;
 let fxTimer = null;
 let inMenu = true;
 let startLevel = MIN_START_LEVEL;
 let pauseView = 'main';
+let pendingRecord = null;
+let highlightScore = null;
 
 function isArcade() {
   return mode === 'arcade';
@@ -199,6 +210,172 @@ function isArcade() {
 
 function isPowerType(type) {
   return POWER_TYPES.includes(type);
+}
+
+function emptyRecords() {
+  return { top: [], bestCombo: 0, maxLines: 0 };
+}
+
+function loadRecords() {
+  try {
+    const raw = localStorage.getItem(RECORDS_KEY);
+    if (!raw) return emptyRecords();
+    const data = JSON.parse(raw);
+    const top = Array.isArray(data.top)
+      ? data.top
+          .filter(e => e && typeof e.score === 'number')
+          .map(e => ({
+            name: String(e.name || '---').slice(0, 12),
+            score: e.score | 0,
+            lines: e.lines | 0,
+            combo: e.combo | 0,
+          }))
+          .sort((a, b) => b.score - a.score)
+          .slice(0, RECORDS_MAX)
+      : [];
+    return {
+      top,
+      bestCombo: Math.max(0, data.bestCombo | 0),
+      maxLines: Math.max(0, data.maxLines | 0),
+    };
+  } catch (_) {
+    return emptyRecords();
+  }
+}
+
+function saveRecords(data) {
+  localStorage.setItem(RECORDS_KEY, JSON.stringify(data));
+}
+
+function qualifiesForTop(scoreValue, top) {
+  if (scoreValue <= 0) return false;
+  if (top.length < RECORDS_MAX) return true;
+  return scoreValue > top[top.length - 1].score;
+}
+
+function insertPendingIntoTop(top, pending) {
+  const list = top.map(e => ({ ...e, pending: false }));
+  if (!pending) return list;
+  list.push({
+    name: pending.name || '---',
+    score: pending.score,
+    lines: pending.lines,
+    combo: pending.combo,
+    pending: true,
+  });
+  return list.sort((a, b) => b.score - a.score).slice(0, RECORDS_MAX);
+}
+
+function renderRecords(highlightPending) {
+  const data = loadRecords();
+  const display = insertPendingIntoTop(
+    data.top,
+    highlightPending ? pendingRecord : null
+  );
+  let highlighted = false;
+
+  recordsList.innerHTML = '';
+  if (!display.length) {
+    const li = document.createElement('li');
+    li.className = 'empty';
+    li.textContent = 'No records yet';
+    recordsList.appendChild(li);
+  } else {
+    display.forEach((entry, i) => {
+      const li = document.createElement('li');
+      const isNew =
+        entry.pending ||
+        (!highlighted &&
+          highlightScore !== null &&
+          entry.score === highlightScore);
+      if (isNew) {
+        li.className = 'highlight';
+        highlighted = true;
+      }
+      li.innerHTML =
+        `<span class="rank">${i + 1}.</span>` +
+        `<span class="name"></span>` +
+        `<span class="pts"></span>`;
+      li.querySelector('.name').textContent = entry.name;
+      li.querySelector('.pts').textContent = entry.score.toLocaleString('en-US');
+      recordsList.appendChild(li);
+    });
+  }
+
+  recordsStats.textContent =
+    `Best combo: x${data.bestCombo}  |  Max lines: ${data.maxLines}`;
+}
+
+function showRecordsForm(show) {
+  recordsForm.classList.toggle('hidden', !show);
+  if (show) {
+    recordsName.value = '';
+    recordsName.focus();
+  }
+}
+
+function updateCareerStats() {
+  const data = loadRecords();
+  let changed = false;
+  if (maxCombo > data.bestCombo) {
+    data.bestCombo = maxCombo;
+    changed = true;
+  }
+  if (lines > data.maxLines) {
+    data.maxLines = lines;
+    changed = true;
+  }
+  if (changed) saveRecords(data);
+}
+
+function prepareEndRecords() {
+  updateCareerStats();
+  const data = loadRecords();
+  pendingRecord = null;
+  highlightScore = null;
+  if (qualifiesForTop(score, data.top)) {
+    pendingRecord = {
+      name: '---',
+      score,
+      lines,
+      combo: maxCombo,
+    };
+    highlightScore = score;
+    showRecordsForm(true);
+  } else {
+    showRecordsForm(false);
+  }
+  recordsPanel.classList.remove('hidden');
+  renderRecords(true);
+}
+
+function commitPendingRecord() {
+  if (!pendingRecord) return;
+  const name = recordsName.value.trim().slice(0, 12) || 'AAA';
+  const data = loadRecords();
+  data.top.push({
+    name,
+    score: pendingRecord.score,
+    lines: pendingRecord.lines,
+    combo: pendingRecord.combo,
+  });
+  data.top.sort((a, b) => b.score - a.score);
+  data.top = data.top.slice(0, RECORDS_MAX);
+  if (pendingRecord.combo > data.bestCombo) data.bestCombo = pendingRecord.combo;
+  if (pendingRecord.lines > data.maxLines) data.maxLines = pendingRecord.lines;
+  highlightScore = pendingRecord.score;
+  saveRecords(data);
+  pendingRecord = null;
+  showRecordsForm(false);
+  renderRecords(false);
+}
+
+function resetRecords() {
+  pendingRecord = null;
+  highlightScore = null;
+  saveRecords(emptyRecords());
+  showRecordsForm(false);
+  renderRecords(false);
 }
 
 function applyTheme(theme) {
@@ -575,6 +752,7 @@ function clearLines(wasTSpin) {
   }
 
   combo += 1;
+  if (combo > maxCombo) maxCombo = combo;
   let lineScore = (LINE_SCORES[cleared] || 0) * level * combo;
 
   const labels = [];
@@ -808,17 +986,26 @@ function showOverlayView(kind) {
     overlayTitle.textContent = 'TETRIS';
     overlayScore.textContent = 'Choose a mode';
     overlayActions.classList.remove('hidden');
+    pendingRecord = null;
+    highlightScore = null;
+    showRecordsForm(false);
+    recordsPanel.classList.remove('hidden');
+    renderRecords(false);
   } else if (kind === 'pause') {
     pauseView = 'main';
     overlayTitle.textContent = 'PAUSED';
     overlayScore.textContent = '';
     overlayPauseActions.classList.remove('hidden');
+    recordsPanel.classList.add('hidden');
+    showRecordsForm(false);
     syncStartLevelUI();
   } else if (kind === 'pause-controls') {
     pauseView = 'controls';
     overlayTitle.textContent = 'CONTROLS';
     overlayScore.textContent = '';
     overlayPauseControls.classList.remove('hidden');
+    recordsPanel.classList.add('hidden');
+    showRecordsForm(false);
   } else {
     pauseView = 'main';
     overlayEndActions.classList.remove('hidden');
@@ -829,6 +1016,9 @@ function hideOverlay() {
   overlay.classList.add('hidden');
   inMenu = false;
   pauseView = 'main';
+  pendingRecord = null;
+  highlightScore = null;
+  showRecordsForm(false);
 }
 
 function adjustStartLevel(delta) {
@@ -847,6 +1037,7 @@ function endGame(reason) {
     overlayTitle.textContent = 'GAME OVER';
     overlayScore.textContent = `Score: ${score.toLocaleString('en-US')}`;
   }
+  prepareEndRecords();
   showOverlayView('end');
 }
 
@@ -856,6 +1047,7 @@ function winGame() {
   cancelAnimationFrame(animId);
   overlayTitle.textContent = 'VICTORY';
   overlayScore.textContent = `Score: ${score.toLocaleString('en-US')}`;
+  prepareEndRecords();
   showOverlayView('end');
 }
 
@@ -937,6 +1129,7 @@ function init(selectedMode) {
   hold = null;
   holdLocked = false;
   combo = 0;
+  maxCombo = 0;
   lastAction = null;
   lastWasTetris = false;
   challengeElapsed = 0;
@@ -1028,6 +1221,14 @@ pauseControlsBtn.addEventListener('click', () => showOverlayView('pause-controls
 pauseControlsBackBtn.addEventListener('click', () => showOverlayView('pause'));
 levelDownBtn.addEventListener('click', () => adjustStartLevel(-1));
 levelUpBtn.addEventListener('click', () => adjustStartLevel(1));
+recordsSaveBtn.addEventListener('click', commitPendingRecord);
+recordsResetBtn.addEventListener('click', resetRecords);
+recordsName.addEventListener('keydown', e => {
+  if (e.code === 'Enter') {
+    e.preventDefault();
+    commitPendingRecord();
+  }
+});
 
 syncStartLevelUI();
 loadSavedSkin();

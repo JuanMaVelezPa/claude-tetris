@@ -104,6 +104,28 @@
         <div class="overlay-box">
           <p id="overlay-title">TETRIS</p>
           <p id="overlay-score">Choose a mode</p>
+          <div id="records-panel" class="records-panel">
+            <p class="records-heading">TOP SCORES</p>
+            <ol id="records-list" class="records-list"></ol>
+            <p id="records-stats" class="records-stats"></p>
+            <div id="records-form" class="records-form hidden">
+              <label for="records-name" class="records-name-label">Your name</label>
+              <div class="records-form-row">
+                <input
+                  type="text"
+                  id="records-name"
+                  maxlength="12"
+                  autocomplete="off"
+                  spellcheck="false"
+                  placeholder="AAA"
+                />
+                <button type="button" id="records-save-btn">Save</button>
+              </div>
+            </div>
+            <button type="button" id="records-reset-btn" class="btn-secondary records-reset">
+              Reset records
+            </button>
+          </div>
           <div id="overlay-actions" class="overlay-actions">
             <button type="button" id="mode-classic-btn">Classic</button>
             <button type="button" id="mode-challenge-btn">Challenge</button>
